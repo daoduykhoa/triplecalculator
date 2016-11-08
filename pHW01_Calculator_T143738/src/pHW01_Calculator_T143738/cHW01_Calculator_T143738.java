@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.JButton;
@@ -18,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
@@ -27,8 +30,8 @@ import javax.swing.border.Border;
  *
  */
 public class cHW01_Calculator_T143738 extends JFrame {
-	int w = 35, h = 35, d = 10;
-	int x = 0, y = 0;
+	int W = 35, H = 35, D = 10;
+	int X = 0, Y = 0;
 	JTextField txaConsole = new JTextField();
 	JMenuBar mnBar;
 	JMenu mnView, mnHelp, mnEdit;
@@ -92,13 +95,36 @@ public class cHW01_Calculator_T143738 extends JFrame {
 							}
 						});
 		
+		mniAbout.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				JOptionPane.showMessageDialog(null, "Java Swing - Simple Calculator"
+						+ "\nAuthor: Khoa Dao");
+			}
+		});
+		
+	this.addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent e) {
+			closeApplication();
+		}
+	});
+}
+	public void closeApplication() {
+		int result = JOptionPane.showConfirmDialog(null,
+				"Do you want to exit the program?", "Confirm",
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if (result == JOptionPane.YES_OPTION) {
+			System.exit(0);
+		}
 	}
 	public void displayMode(int mode) {
 		if (mode == 1) {
 			panStandard.setVisible(true);
-			panStandard.setBounds(10, 75, x + w - 45, y + h - 45);
+			panStandard.setBounds(10, 75, X + W - 45, Y + H - 45);
 			
-			this.setSize(5 * w + 4 * d + 20, 6 * h + 4 * d + 120);
+			this.setSize(5 * W + 4 * D + 20, 6 * H + 4 * D + 120);
 		}
 		}
 	// Standard Mode
@@ -106,26 +132,26 @@ public class cHW01_Calculator_T143738 extends JFrame {
 				public void mStandard() {
 					panStandard.setLayout(null);
 					Insets isMargin = new Insets(1, 1, 1, 1);
-					y = 0;
+					Y = 0;
 					for (int i = 0; i < 6; i++) {
-						x = 0;
+						X = 0;
 						for (int j = 0; j < 5; j++) {
 							btnNumbersPad[i][j] = new JButton(sLabel[i][j]);
-							btnNumbersPad[i][j].setBounds(x, y, w, h);
+							btnNumbersPad[i][j].setBounds(X, Y, W, H);
 							btnNumbersPad[i][j].setMargin(isMargin);
-							btnNumbersPad[i][j].setBackground(Color.LIGHT_GRAY);
+							btnNumbersPad[i][j].setBackground(Color.WHITE);
 							btnNumbersPad[i][j].setForeground(Color.BLACK);
 							panStandard.add(btnNumbersPad[i][j]);
-							x = x + w + d;
+							X = X + W + D;
 						}
-						y = y + h + d;
+						Y = Y + H + D;
 					}
-					btnNumbersPad[4][4].setSize(w, h + d + h);
-					btnNumbersPad[5][0].setSize(w + d + w, h);
-					btnNumbersPad[5][1].setLocation(w + d + w + d, y - h - d);
+					btnNumbersPad[4][4].setSize(W, H + D + H);
+					btnNumbersPad[5][0].setSize(W + D + W, H);
+					btnNumbersPad[5][1].setLocation(W + D + W + D, Y - H - D);
 					btnNumbersPad[5][4].setVisible(false);
 					getContentPane().add(panStandard);
-					txaConsole.setBounds(10, 10, 5* w + 4 *d , 50);
+					txaConsole.setBounds(10, 10, 5* W + 4 *D , 50);
 					panText.setLayout(null);
 					getContentPane().add(panText);
 					displayMode(1);
