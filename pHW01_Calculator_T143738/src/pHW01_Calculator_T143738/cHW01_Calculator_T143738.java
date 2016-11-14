@@ -37,6 +37,7 @@ import javax.swing.border.Border;
 public class cHW01_Calculator_T143738 extends JFrame {
 	int W = 35, H = 35, D = 10;
 	int X = 0, Y = 0;
+	changelogs S = new changelogs();
 	JTextField txaConsole = new JTextField();
 	JMenuBar mnBar;
 	JMenu mnView, mnHelp, mnEdit;
@@ -128,6 +129,8 @@ public class cHW01_Calculator_T143738 extends JFrame {
 								mScnmode();
 							}else if (e.getSource() == mniPro) {
 								mPromode();
+							}else if (e.getSource() == mniAbout) {
+								S.setVisible(true);
 							}
 						}
 					};
@@ -135,6 +138,7 @@ public class cHW01_Calculator_T143738 extends JFrame {
 					mniStand.addActionListener(acMode);
 					mniScf.addActionListener(acMode);
 					mniPro.addActionListener(acMode);
+					mniAbout.addActionListener(acMode);
 					// Recall close command
 					
 	}
@@ -323,6 +327,12 @@ public class cHW01_Calculator_T143738 extends JFrame {
 						}
 						Y = Y + H + D;
 					}
+					btnPropad[1][0].setEnabled(false);
+					btnPropad[1][1].setEnabled(false);
+					btnPropad[3][0].setEnabled(false);
+					btnPropad[3][1].setEnabled(false);
+					btnPropad[4][1].setEnabled(false);
+					btnPropad[4][0].setEnabled(false);
 					getContentPane().add(panProgrammer);
 					displayMode(3);
 				}
