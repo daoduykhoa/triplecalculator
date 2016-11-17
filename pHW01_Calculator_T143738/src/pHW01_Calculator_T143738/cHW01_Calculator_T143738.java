@@ -5,6 +5,7 @@ package pHW01_Calculator_T143738;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;
@@ -15,12 +16,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -28,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 
 /**
@@ -37,15 +41,19 @@ import javax.swing.border.Border;
 public class cHW01_Calculator_T143738 extends JFrame {
 	int W = 35, H = 35, D = 10;
 	int X = 0, Y = 0;
-	changelogs S = new changelogs();
-	JTextField txaConsole = new JTextField();
+	double TempNumbers = 0, TempNumbers2 = 0, TempMemory, subMem;
+	boolean bAppend = false;
+	String sDoors="", sClick="", sCurrent="";
+	JButton btnCheckout = new JButton();
+	JTextField txtConsole = new JTextField(), txtMode = new JTextField();
+	JLabel lblStand = new JLabel("Standard");
 	JMenuBar mnBar;
-	JMenu mnView, mnHelp, mnEdit;
+	JMenu mnMode, mnHelp, mnEdit;
 	JMenuItem mniStand, mniPro, mniScf, mniAbout;
+	About panAbout = new About();
 	JPanel panStandard = new JPanel();
 	JPanel panScientific = new JPanel();
 	JPanel panProgrammer = new JPanel();
-	JPanel panText = new JPanel();
 	JPanel panAU = new JPanel(),
 		   panHeDem = new JPanel(),
 		   panNknwn = new JPanel();
@@ -73,7 +81,7 @@ public class cHW01_Calculator_T143738 extends JFrame {
 	// Menu bar
 	public void initializeMenu() {
 		mnBar = new JMenuBar();
-		mnView = new JMenu("Mode");
+		mnMode = new JMenu("Mode");
 		mnEdit = new JMenu("Edit");
 		mnHelp = new JMenu("Help");
 		mniStand = new JMenuItem("Standard");
@@ -81,14 +89,24 @@ public class cHW01_Calculator_T143738 extends JFrame {
 		mniScf = new JMenuItem("Scientific");
 		mniAbout = new JMenuItem("About");
 		// add submn to ViewOption
-		mnView.add(mniStand);
-		mnView.add(mniScf);
-		mnView.add(mniPro);
+		mnMode.add(mniStand);
+		mnMode.add(mniScf);
+		mnMode.add(mniPro);
 		// add submn to HelpOption
 		mnHelp.add(mniAbout);
-		// add menu to menu bar
-		mnBar.add(mnView);
+		// add menu to Menu bar
+		mnBar.add(mnMode);
 		mnBar.add(mnHelp);
+		// Set hotkey for MenuItem
+		mniStand.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
+						ActionEvent.CTRL_MASK));
+	    mniScf.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+						ActionEvent.CTRL_MASK));
+		mniPro.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+						ActionEvent.CTRL_MASK));
+		// Set icon for MenuItem
+		//mniStand.setIcon(imCaculator);
+		//mniAbout.setIcon(imAbout);
 		setJMenuBar(mnBar);
 	}
 
@@ -102,21 +120,27 @@ public class cHW01_Calculator_T143738 extends JFrame {
 		initializeMenu();
 		setResizable(false);
 		mStandard();
+		CoreProcess();
+		txtMode.setEditable(false);
 		// Add component to window
-		add(txaConsole);
-		// Set postition
-
+		add(txtConsole);
+		// Customize
+		txtConsole.setFont(new Font(Font.SANS_SERIF, Font.LAYOUT_RIGHT_TO_LEFT, 20));
+		txtConsole.setHorizontalAlignment(JTextField.RIGHT);
+		txtConsole.setEditable(false);
+		txtConsole.setBackground(Color.WHITE);
+		txtConsole.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
 		// Function
 					// User only accept to input numbers
-					txaConsole.addKeyListener(new KeyAdapter() {
-						@Override
-						public void keyTyped(KeyEvent e) {
-							char ch = e.getKeyChar();
-							if (ch < '0' || ch > '9') {
-								e.consume();
-							}
-						}
-					});
+					//txtConsole.addKeyListener(new KeyAdapter() {
+						//@Override
+						//public void keyTyped(KeyEvent e) {
+						//	char ch = e.getKeyChar();
+						//	if (ch < '0' || ch > '9') {
+						//		e.consume();
+						//	}
+						//}
+				//	});
 					// When user choose option
 					ActionListener acMode = new ActionListener() {
 						
@@ -130,7 +154,7 @@ public class cHW01_Calculator_T143738 extends JFrame {
 							}else if (e.getSource() == mniPro) {
 								mPromode();
 							}else if (e.getSource() == mniAbout) {
-								S.setVisible(true);
+								panAbout.setVisible(true);
 							}
 						}
 					};
@@ -145,7 +169,9 @@ public class cHW01_Calculator_T143738 extends JFrame {
 
 	// TRIPLE MODE //
 	public void displayMode(int mode) {
+		int x=this.getX(), y = this.getY();
 		if (mode == 1) {
+			this.setTitle("Mode: Standard");
 			panStandard.setVisible(true);
 			panScientific.setVisible(false);
 			panHeDem.setVisible(false);
@@ -153,9 +179,10 @@ public class cHW01_Calculator_T143738 extends JFrame {
 			panAU.setVisible(false);
 			panProgrammer.setVisible(false);
 			panStandard.setBounds(10, 75, X + W - 45, Y + H - 45);
-			this.setSize(5 * W + 4 * D + 20, 6 * H + 4 * D + 120);
+			this.setSize(5 * W + 4 * D + 20, 6 * H + 4 * D + 120 + 25);
 		}
 		if (mode == 2) {
+			this.setTitle("Mode: Scientific");
 			panAU.setVisible(true);
 			panStandard.setVisible(true);
 			panScientific.setVisible(true);
@@ -165,9 +192,10 @@ public class cHW01_Calculator_T143738 extends JFrame {
 			panAU.setBounds(10, 75, X - 10, H);
 			panStandard.setBounds(W + X - 25, 75, X + W + 20, Y + H);			
 			panScientific.setBounds(10, 75 + H + 10, X, Y + H - 40);
-			this.setSize(5 * W + 4 * D + X + W - 15, 6 * H + 4 * D + 115);
+			this.setSize(5 * W + 4 * D + X + W - 15, 6 * H + 4 * D + 115 + 25);
 		}
 		if (mode == 3) {
+			this.setTitle("Mode: Programmer");
 			panAU.setVisible(false);
 			panStandard.setVisible(true);
 			panScientific.setVisible(false);
@@ -178,7 +206,7 @@ public class cHW01_Calculator_T143738 extends JFrame {
 			panProgrammer.setBounds(W + 80, 75, X + W + 20, Y + H);
 			panHeDem.setBounds(10, 75, 95, 125);
 			panNknwn.setBounds(10, 210, 95, 125);
-			this.setSize(5 * W + 4 * D + X + W + 100, 6 * H + 4 * D + 115);
+			this.setSize(5 * W + 4 * D + X + W + 100, 6 * H + 4 * D + 115 + 25);
 		}
 	}
 				// STANDARD
@@ -205,16 +233,17 @@ public class cHW01_Calculator_T143738 extends JFrame {
 					btnNumbersPad[5][1].setLocation(W + D + W + D, Y - H - D);
 					btnNumbersPad[5][4].setVisible(false);
 					getContentPane().add(panStandard);
-					txaConsole.setBounds(10, 10, 5 * W + 4 * D, 50);
-					panText.setLayout(null);
-					getContentPane().add(panText);
+					txtConsole.setBounds(10, 10, 5 * W + 4 * D, 50);
+					//panText.setLayout(null);
 					displayMode(1);
+					// Show mode
+					
 				}
 				
 				// SCIENTIFIC
 					public void mScnmode() {
 						// Resize console screens
-						txaConsole.setBounds(10, 10, 5 * W + 4 * D + 270, 50);
+						txtConsole.setBounds(10, 10, 5 * W + 4 * D + 270, 50);
 						// Angel units panel
 						btG.add(optDegrees);
 						btG.add(optGrads);
@@ -267,7 +296,7 @@ public class cHW01_Calculator_T143738 extends JFrame {
 				// PROGRAMER
 				public void mPromode() {
 					// Resize console screens
-					txaConsole.setBounds(10, 10, 5 * W + 4 * D + 275, 50);
+					txtConsole.setBounds(10, 10, 5 * W + 4 * D + 275, 50);
 					// He dem panel
 					panHeDem.setLayout(null);
 					panNknwn.setLayout(null);
@@ -336,14 +365,259 @@ public class cHW01_Calculator_T143738 extends JFrame {
 					getContentPane().add(panProgrammer);
 					displayMode(3);
 				}
-	// WHEN USER CLOSE APPLICATION //
-	//public void closeApplication() {
-	//	int result = JOptionPane.showConfirmDialog(null, "Do you want to exit the program?", "Confirm", 
-	//			JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-	//	if (result == JOptionPane.YES_OPTION) {
-	//		System.exit(0);
-	//	}
-	//}
+				
+				
+				
+				
+				
+	// CALCULATE FUNCTION
+				public void CoreProcess() {
+					// Numbers input
+					ActionListener acMemory = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent c) {
+							// TODO Auto-generated method stub
+							JButton btnClicked = (JButton) c.getSource();
+							String sClick = btnClicked.getText();
+							if (sClick.equals("MS")) {
+
+								TempMemory = Double.parseDouble(txtConsole.getText());
+								txtConsole.setText("0");
+
+							} else if (sClick.equals("MR")) {
+								if (TempMemory % 1 == 0) {
+									txtConsole.setText("" + (int) TempMemory);
+								}else{
+									txtConsole.setText("" + TempMemory);
+								}
+							} else if (sClick.equals("MC")) {
+								TempMemory = 0;
+							} else if (sClick.equals("M+")) {
+								subMem = Double.parseDouble(txtConsole.getText());
+								if (TempMemory % 1 == 0) {
+									TempMemory = (int) (TempMemory + subMem);
+								}else{
+									TempMemory = TempMemory + subMem;
+								}
+								
+
+							} else if (sClick.equals("M-")) {
+								subMem = Double.parseDouble(txtConsole.getText());
+								if (TempMemory % 1 == 0) {
+									TempMemory = (int) (TempMemory - subMem);
+								}else{
+									TempMemory = TempMemory - subMem;
+								}
+
+							}
+
+							bAppend = false;
+						}
+
+					};
+					btnNumbersPad[0][0].addActionListener(acMemory);
+					btnNumbersPad[0][1].addActionListener(acMemory);
+					btnNumbersPad[0][2].addActionListener(acMemory);
+					btnNumbersPad[0][3].addActionListener(acMemory);
+					btnNumbersPad[0][4].addActionListener(acMemory);
+					// Allow users can click button numbers
+					ActionListener acNumbers = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							btnCheckout = (JButton) e.getSource();
+							sClick = btnCheckout.getText();
+							sCurrent = txtConsole.getText();
+							if (bAppend == true) {
+								if (sCurrent.equals("0")) {
+									txtConsole.setText(sClick);
+								} else {
+									txtConsole.setText(sCurrent + sClick);
+								}
+							} else {
+								txtConsole.setText(sClick);
+								bAppend = true;
+							}
+
+							}
+					};
+					for (int i = 2; i < 6; i++) {
+						for (int j = 0; j < 3; j++) {
+							btnNumbersPad[i][j].addActionListener(acNumbers);
+						}
+
+					}
+					// Operation of process
+					ActionListener acDoors = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent a) {
+							// TODO Auto-generated method stub
+							btnCheckout = (JButton) a.getSource();
+							sClick = btnCheckout.getText();
+							sCurrent = txtConsole.getText();
+							TempNumbers = Double.parseDouble(sCurrent);
+							sDoors = sClick;
+							bAppend = false;
+						}
+					};
+					btnNumbersPad[5][3].addActionListener(acDoors);
+					btnNumbersPad[4][3].addActionListener(acDoors);
+					btnNumbersPad[3][3].addActionListener(acDoors);
+					btnNumbersPad[2][3].addActionListener(acDoors);
+					// Basic calculator
+					ActionListener acBasicMath = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							// TODO Auto-generated method stub
+							sCurrent = txtConsole.getText();
+							TempNumbers2 = Double.parseDouble(sCurrent);
+							if (sDoors.equals("+")) {
+								TempNumbers2 = TempNumbers + TempNumbers2;
+								if (TempNumbers2 % 1 == 0) {
+									int iDone = (int) TempNumbers2;
+									txtConsole.setText("" + iDone);
+								}
+							}
+							if (sDoors.equals("-")) {
+								TempNumbers2 = TempNumbers - TempNumbers2;
+								if (TempNumbers2 % 1 == 0) {
+									int iDone = (int) TempNumbers2;
+									txtConsole.setText("" + iDone);
+								}
+							}
+							if (sDoors.equals("*")) {
+								TempNumbers2 = TempNumbers * TempNumbers2;
+								if (TempNumbers2 % 1 == 0) {
+									int iDone = (int) TempNumbers2;
+									txtConsole.setText("" + iDone);
+								}
+							}
+							if (sDoors.equals("/")) {
+								TempNumbers2 = TempNumbers / TempNumbers2;
+								if (TempNumbers2 % 1 == 0) {
+									int iDone = (int) TempNumbers2;
+									txtConsole.setText("" + iDone);
+								}
+							}
+							bAppend = false;
+						}
+					};
+					btnNumbersPad[4][4].addActionListener(acBasicMath);
+					// Positive & Non positive
+					ActionListener acPnNP = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							if (txtConsole.getText().startsWith("-")) {
+								txtConsole.setText(txtConsole.getText().substring(1, txtConsole.getText().length()));
+							} else {
+								txtConsole.setText("-" + txtConsole.getText());
+							}
+							bAppend = false;
+						}
+					};
+					btnNumbersPad[1][3].addActionListener(acPnNP);
+					
+					// 1/x
+					ActionListener ac1pX = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							btnCheckout = (JButton) e.getSource();
+							sClick = btnCheckout.getText();
+							if (sClick.equals("1/x")) {
+								double d1DivX = Double.parseDouble(txtConsole.getText());
+								double d1 = 1 / d1DivX;
+								txtConsole.setText("" + d1);
+							}
+							bAppend = false;
+
+						}
+					};
+					btnNumbersPad[3][4].addActionListener(ac1pX);
+					
+					ActionListener acSQRT = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							btnCheckout = (JButton) e.getSource();
+							sClick = btnCheckout.getText();
+							if (sClick.equals("sqrt")) {
+								double dSQRT = Double.parseDouble(txtConsole.getText());
+								double dSResult = Math.sqrt(dSQRT);
+								txtConsole.setText("" + dSResult);
+							}
+							bAppend = false;
+
+						}
+					};
+					btnNumbersPad[1][4].addActionListener(acSQRT);
+					
+					// % 
+					ActionListener acDiv = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							btnCheckout = (JButton) e.getSource();
+							sClick = btnCheckout.getText();
+
+							if (sDoors.equals("*")) {
+
+								if (sClick.equals("%")) {
+									double dDiv = Double.parseDouble(txtConsole.getText());
+									double dDivRe = TempNumbers * (dDiv / 100);
+									txtConsole.setText("" + dDivRe);
+								}
+							}
+							bAppend = false;
+
+						}
+					};
+					btnNumbersPad[2][4].addActionListener(acDiv);
+					
+					
+					// Clear console function
+					ActionListener acRM = new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							JButton btnClicked = (JButton) e.getSource();
+							String sClick = btnClicked.getText();
+
+							if (sClick.equals("C")) {
+								txtConsole.setText("0");
+							} else if (sClick.equals("CE")) {
+								txtConsole.setText("0");
+							} else if (sClick.equals("Del")) {
+								if (txtConsole.getText().length() > 1) {
+									txtConsole.setText(txtConsole.getText().substring(0, 
+									txtConsole.getText().length() - 1));
+								} else {
+									txtConsole.setText("0");
+								}
+							}
+
+						}
+
+					};
+					btnNumbersPad[1][2].addActionListener(acRM);
+					btnNumbersPad[1][1].addActionListener(acRM);
+					btnNumbersPad[1][0].addActionListener(acRM);
+					
+				}
+	// SCIENTIFIC CALCULATE FUNCTION
+				public void SciRadMode() {
+					
+				}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

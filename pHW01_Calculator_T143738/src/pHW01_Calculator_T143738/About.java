@@ -14,14 +14,15 @@ import javax.swing.JTextArea;
  * @author ddkhoa
  *
  */
-public class changelogs extends JDialog {
+public class About extends JDialog {
 	JScrollPane scr;
 	JTextArea txaChangelog = new JTextArea();
-	public changelogs(){
-		setTitle("Change log");
+	public About(){
+		setTitle("About");
 		setSize(179,100);
 		setLayout(null);
 		setLocationRelativeTo(null);
+		setResizable(false);
 		scr = new JScrollPane(txaChangelog);
 		txaChangelog.setEditable(false);
 		add(scr);
