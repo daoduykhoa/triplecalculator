@@ -19,7 +19,7 @@ public class About extends JDialog {
 	JTextArea txaChangelog = new JTextArea();
 	public About(){
 		setTitle("About");
-		setSize(179,100);
+		setSize(179,150);
 		setLayout(null);
 		setLocationRelativeTo(null);
 		setResizable(false);

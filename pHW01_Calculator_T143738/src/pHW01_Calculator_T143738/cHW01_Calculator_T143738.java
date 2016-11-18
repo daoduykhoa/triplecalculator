@@ -1,3 +1,5 @@
+// Issue #1. The window has been moved after users change display mode
+// not happen on Windows. This problem only happen in Linux OS (Ubuntu)
 /**
  * 
  */
